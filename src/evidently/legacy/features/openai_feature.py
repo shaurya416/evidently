@@ -162,7 +162,8 @@ def _postprocess_response(response: str, check_mode: str, possible_values: Optio
         if line:
             if possible_values:
                 if check_mode.endswith("contains"):
-                    for v in possible_values:
+                    # try longer labels first so "incorrect" is not read as "correct"
+                    for v in sorted(possible_values, key=len, reverse=True):
                         if v in line:
                             return v
                 else:
