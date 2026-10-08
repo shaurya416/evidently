@@ -162,9 +162,8 @@ def _postprocess_response(response: str, check_mode: str, possible_values: Optio
         if line:
             if possible_values:
                 if check_mode.endswith("contains"):
-                    # try longer labels first so "incorrect" is not read as "correct"
-                    for v in sorted(possible_values, key=len, reverse=True):
-                        if v in line:
+                    for v in possible_values:
+                        if v in line and v in _without_longer_labels(line, v, possible_values):
                             return v
                 else:
                     if line in possible_values:
@@ -175,3 +174,11 @@ def _postprocess_response(response: str, check_mode: str, possible_values: Optio
                     return None
             return line
     return None
+
+
+def _without_longer_labels(line: str, label: str, possible_values: List[str]) -> str:
+    """Blank out every longer label that contains `label`, so "incorrect" is not read as "correct"."""
+    for other in possible_values:
+        if other != label and label in other:
+            line = line.replace(other, " ")
+    return line
